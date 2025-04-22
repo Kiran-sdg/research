@@ -1,2 +1,1 @@
-<div data-sly-include="path/to/your/file.html"></div>
-# research
+java -Xdebug -Xrunjdwp:transport=dt_socket,address=58242,suspend=n,server=y -Xmx1024m -jar
