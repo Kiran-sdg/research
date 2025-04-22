@@ -1,0 +1,30 @@
+package com.example.core.models;
+
+import javax.inject.Inject;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.models.annotations.DefaultInjectionStrategy;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Optional;
+
+@Model(
+    adaptables = Resource.class,
+    defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
+)
+public class TextSpclItem {
+
+    @Inject
+    private String text_spcl;
+
+    @Inject
+    @Optional
+    private String descriptionSpcl;
+
+    public String getTextSpcl() {
+        return text_spcl;
+    }
+
+    public String getDescription() {
+        return descriptionSpcl;
+    }
+}

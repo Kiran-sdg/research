@@ -1,0 +1,8 @@
+<sly data-sly-use.model="com.example.core.models.IconList" />
+
+<sly data-sly-list.item="${model.textSpclItems}">
+   
+        <div class="custom-title">${item.textSpcl @ context='html'}</div>
+        <div class="custom-description">${item.descriptionSpcl @ context='html'}</div>
+   
+</sly>

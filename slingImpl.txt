@@ -1,0 +1,21 @@
+package com.example.core.models;
+
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.ChildResource;
+import javax.inject.Inject;
+import java.util.List;
+
+@Model(
+    adaptables = Resource.class,
+    adapters = IconList.class
+)
+public class IconListImpl implements IconList {
+
+    @ChildResource
+    private List<TextSpclItem> textList;
+
+    @Override
+    public List<TextSpclItem> getTextSpclItems() {
+        return textList;
+    }
+}
