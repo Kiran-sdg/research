@@ -1,0 +1,7 @@
+textList
+
+ <sly data-sly-test="${properties.listFrom == 'text_spcl'}">
+    <sly data-sly-test="${list.textSpclItems[itemList.index]}"> ${list.textSpclItems[itemList.index]} </sly>
+    <sly data-sly-test="${list.textSpclItems[itemList.index]}"> ${list.textSpclItems[itemList.index] @
+        context = 'html'} </sly>
+</sly>

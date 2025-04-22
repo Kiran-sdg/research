@@ -1,0 +1,33 @@
+private void setTextListItems() {
+        if(null != textList) {
+            Iterator<Resource> iterator = textList.listChildren();
+            if(iterator != null) {
+                while(iterator.hasNext()) {
+                    Resource resource = iterator.next();
+                    ValueMap props = resource.getValueMap();
+                    textItems.add(props.get("text","").trim());                       
+                    textSpclItems.add(props.get("text_spcl","").trim());
+                    descriptionItems.add(props.get(JcrConstants.JCR_DESCRIPTION,"").trim());
+                }
+            }
+        }
+    }
+
+private void setTextspclListItems() {
+        if(null != textList) {
+            Iterator<Resource> iterator = textList.listChildren();
+            if(iterator != null) {
+                while(iterator.hasNext()) {
+                    Resource resource = iterator.next();
+                    ValueMap props = resource.getValueMap();
+                    textSpclItems.add(props.get("text_spcl","").trim());
+                    descriptionItems.add(props.get(JcrConstants.JCR_DESCRIPTION,"").trim());
+                }
+            }
+        }
+    }
+	
+	 @Override
+    public java.util.List<String> getTextSpclItems() {
+        return Collections.unmodifiableList(textSpclItems);
+    }
