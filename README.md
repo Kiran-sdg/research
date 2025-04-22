@@ -1,1 +1,1 @@
-java -Xdebug -Xrunjdwp:transport=dt_socket,address=58242,suspend=n,server=y -Xmx1024m -jar
+java -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8888 -XX:MaxPermSize=512M -Xmx3024m -jar aem-sdk-p4502-author.jar -nofork -gui -port 4502 -r author
