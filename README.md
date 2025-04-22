@@ -1,3 +1,2 @@
-Defines the List Sling Model used for the /apps/core/wcm/components/list component. This component currently only supports page lists.
-
+<div data-sly-include="path/to/your/file.html"></div>
 # research
