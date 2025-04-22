@@ -1,0 +1,6 @@
+<sly data-sly-list.spclitem="${resource.getChild('textList').listChildren}">
+    <sly data-sly-test="${spclitem.properties['text_spcl'] || spclitem.properties['jcr:description']}">
+        ${spclitem.properties['text_spcl'] @ context='html'}
+        ${spclitem.properties['jcr:description'] @ context='html'}
+    </sly>
+</sly>
