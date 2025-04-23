@@ -17,3 +17,6 @@ Caused by: org.apache.sling.models.factory.PostConstructException: Post-construc
 	at org.apache.sling.scripting.sightly.impl.engine.extension.use.UseRuntimeExtension.call(UseRuntimeExtension.java:71) [org.apache.sling.scripting.sightly:1.4.26.140]
 	... 429 common frames omitted
 Caused by: java.lang.NullPointerException: null
+
+
+ Failed to execute goal org.apache.maven.plugins:maven-clean-plugin:3.0.0:clean (default-clean) on project ncsecu-aem-site.ui.apps: Failed to clean project: Failed to delete C:\AEMStorefront\AEM-DEV\AEM\ui.apps\target ->
