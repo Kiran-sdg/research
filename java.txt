@@ -1,9 +1,0 @@
-package org.ncsecu.aem.site.core.models;
-
-import com.adobe.cq.wcm.core.components.models.List;
-
-public interface NcsecuIconList extends List {
-
-   
-    public java.util.List<String> getTextSpclItems();
-}
