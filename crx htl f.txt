@@ -1,0 +1,50 @@
+<div 
+  class="cmp-list"
+  data-cmp="list"
+  data-sly-use.list="org.ncsecu.aem.site.core.models.NcsecuList"
+  data-sly-use.listactions="org.ncsecu.aem.site.core.models.NcsecuActions"
+  data-sly-use.template="core/wcm/components/commons/v1/templates.html"
+  data-sly-use.itemTemplate="item.html"
+  data-sly-test.hasContent="${properties.title || list.listItems.size > 0 || list.textItems.size > 0 || listactions.actions.size > 0}"
+>
+  <a data-sly-unwrap="${!list.linkURL}" data-sly-test="${properties.title || properties.customTitle}" class="cmp-list__title-link" target="${properties.linkTarget}" href="${list.linkURL}" >
+    <span class="cmp-list__item-title ${properties.titleType}">${properties.isCustomizeTitle ? properties.customTitle : properties.title @ context = 'html'}</span>
+  </a>
+  <sly data-sly-test.listFrom="${properties.listFrom}"/>
+  <sly data-sly-test="${listFrom != 'text'  && listFrom != 'customLinks'}">
+      <ul data-sly-list.item="${list.listItems}"
+        id="${list.id}"
+        data-cmp-data-layer="${list.data.json}"
+        class="cmp-list">
+        <li data-sly-test="${!list.displayItemAsTeaser}"
+            class="cmp-list__item" data-sly-call="${itemTemplate.item @ list = list, item = item}"
+            data-cmp-data-layer="${item.data.json}"></li>
+      </ul>
+  </sly>
+
+  <sly data-sly-test="${listFrom == 'text' && (list.textItems.size>0 || list.descriptionItems.size>0)}">
+      <ul data-sly-list.item="${list.textItems}"
+        id="${list.id}"
+        class="cmp-list"> 
+        <li class="cmp-list__item ${list.descriptionItems[itemList.index] ? 'has-child' : ''}" data-sly-test="${item || list.descriptionItems[itemList.index]}">
+            <sly data-sly-test="${item}">${item}</sly>
+            <sly data-sly-test="${list.descriptionItems[itemList.index]}">${list.descriptionItems[itemList.index] @ context = 'html'}</sly>
+        </li>
+      </ul>
+  </sly>
+  
+ <sly data-sly-test="${properties.listFrom == 'text_spcl'}">
+    <sly data-sly-test="${list.textSpclItems[itemList.index]}"> ${list.textSpclItems[itemList.index]} </sly>
+    <sly data-sly-test="${list.textSpclItems[itemList.index]}"> ${list.textSpclItems[itemList.index] @
+        context = 'html'} </sly>
+</sly>
+
+  <sly data-sly-test="${listFrom == 'customLinks'}">
+      <ul data-sly-list.item="${listactions.actions}" data-sly-use.actionTemplate="action.html"
+        id="${list.id}"
+        class="cmp-list">
+        <li class="cmp-list__item" data-sly-call="${actionTemplate.action @ action=item}"></li>
+      </ul>
+  </sly>
+</div>
+<sly data-sly-call="${template.placeholder @ isEmpty=!hasContent, classAppend='cmp-list'}"></sly>

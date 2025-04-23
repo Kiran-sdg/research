@@ -1,0 +1,148 @@
+package org.ncsecu.aem.site.core.models.impl;
+
+import org.ncsecu.aem.site.core.models.NcsecuList;
+
+import com.day.cq.commons.jcr.JcrConstants;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.api.PageManager;
+import com.adobe.cq.wcm.core.components.models.List;
+import lombok.experimental.Delegate;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ValueMap;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.models.annotations.DefaultInjectionStrategy;
+import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.Via;
+import org.apache.sling.models.annotations.injectorspecific.ChildResource;
+import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
+import org.apache.sling.models.annotations.injectorspecific.Self;
+import org.apache.sling.models.annotations.injectorspecific.SlingObject;
+import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+import org.apache.sling.models.annotations.via.ResourceSuperType;
+
+@Model(
+    adaptables = {SlingHttpServletRequest.class},
+    defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL,
+    adapters = NcsecuList.class,
+    resourceType = "ncsecu/components/list"
+)
+public class NcsecuListImpl implements NcsecuList {
+    @Self
+    @Via(type = ResourceSuperType.class)
+    @Delegate(excludes = DelegationExclusion.class)
+    private List list;
+
+    @SlingObject
+    private Resource currentResource;
+
+    @ScriptVariable
+    private PageManager pageManager;
+    
+    @ValueMapValue
+    private String listFrom;
+    
+    @ChildResource
+    private Resource textList;
+    
+    private java.util.List<String> textItems;
+    private java.util.List<String> textSpclItems;
+    private java.util.List<String> descriptionItems;
+    private java.util.List<String> descriptionSpclItems;
+
+    protected String link;
+
+    private static final String HTML = ".html";
+
+    @PostConstruct
+    protected void init() {
+        textItems = new ArrayList<>();
+        textSpclItems = new ArrayList<>();
+        descriptionItems = new ArrayList<>();
+        if(StringUtils.isNotEmpty(listFrom) && "text".equals(listFrom)) {
+            setTextListItems();
+            setTextspclListItems();
+        }
+    }
+    
+    private void setTextListItems() {
+        if(null != textList) {
+            Iterator<Resource> iterator = textList.listChildren();
+            if(iterator != null) {
+                while(iterator.hasNext()) {
+                    Resource resource = iterator.next();
+                    ValueMap props = resource.getValueMap();
+                    textItems.add(props.get("text","").trim());                       
+                    textSpclItems.add(props.get("text_spcl","").trim());
+                    descriptionItems.add(props.get(JcrConstants.JCR_DESCRIPTION,"").trim());
+                }
+            }
+        }
+    }
+
+     private void setTextspclListItems() {
+        if(null != textList) {
+            Iterator<Resource> iterator = textList.listChildren();
+            if(iterator != null) {
+                while(iterator.hasNext()) {
+                    Resource resource = iterator.next();
+                    ValueMap props = resource.getValueMap();
+                    textSpclItems.add(props.get("text_spcl","").trim());
+                    descriptionSpclItems.add(props.get("descriptionSpcl","").trim());
+                }
+            }
+        }
+    }
+    
+    @Override
+    public java.util.List<String> getTextItems(){
+        return Collections.unmodifiableList(textItems);
+    }
+
+    @Override
+    public java.util.List<String> getTextSpclItems() {
+        return Collections.unmodifiableList(textSpclItems);
+    }
+    
+    @Override
+    public java.util.List<String> getDescriptionItems(){
+        return Collections.unmodifiableList(descriptionItems);
+    }
+    
+    @Override
+    public String getLinkURL() {
+        String linkstring = this.currentResource.getValueMap().get("linkURL", "");
+
+        if(linkstring.isEmpty()) {
+            return "";
+        }
+
+        Page page = pageManager.getPage(linkstring);
+        if(page != null) {
+             String vanityURL = page.getVanityUrl();
+
+            if (StringUtils.isEmpty(vanityURL)) {
+                link = page.getPath() + HTML;
+            } else {
+                link = vanityURL;
+            }
+        } else {
+            link = linkstring;
+        }
+
+        return link.contains(HTML) ? link : (link + HTML);
+    }
+    
+    private interface DelegationExclusion {
+        String getLinkURL();
+        java.util.List<String> getTextItems();
+    }
+}
