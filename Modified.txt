@@ -17,7 +17,7 @@ public java.util.List<String> getDescriptionSpclItems() {
 
 
 htl
-<sly data-sly-test="${properties.listFrom == 'text_spcl'}">
+<sly data-sly-test="${listFrom == 'text_spcl' && (list.textSpclItems.size>0 || list.descriptionSpclItems.size>0)}">
   <ul class="cmp-list">
     <li data-sly-list.item="${list.textSpclItems}" class="cmp-list__item ${list.descriptionSpclItems[itemList.index] ? 'has-child' : ''}">
       <sly data-sly-test="${item}">${item}</sly>
