@@ -2,3 +2,6 @@ java -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=
 
 
 The method getDescriptionSpclItems() of type NcsecuListImpl must override or implement a supertype method
+
+System.out.println("NcsecuListImpl: textSpclItems = " + textSpclItems);
+System.out.println("NcsecuListImpl: descriptionSpclItems = " + descriptionSpclItems);
