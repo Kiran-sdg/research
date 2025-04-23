@@ -1,0 +1,27 @@
+
+init method
+else if ("text_spcl".equals(listFrom)) {
+            setTextspclListItems();
+        }
+		
+		
+		
+		
+getter method		
+		
+@Override
+public java.util.List<String> getDescriptionSpclItems() {
+    return Collections.unmodifiableList(descriptionSpclItems);
+}
+
+
+
+htl
+<sly data-sly-test="${properties.listFrom == 'text_spcl'}">
+  <ul class="cmp-list">
+    <li data-sly-list.item="${list.textSpclItems}" class="cmp-list__item ${list.descriptionSpclItems[itemList.index] ? 'has-child' : ''}">
+      <sly data-sly-test="${item}">${item}</sly>
+      <sly data-sly-test="${list.descriptionSpclItems[itemList.index]}">${list.descriptionSpclItems[itemList.index] @ context='html'}</sly>
+    </li>
+  </ul>
+</sly>
