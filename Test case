@@ -1,0 +1,127 @@
+package org.ncsecu.aem.site.core.services;
+
+import static org.mockito.Mockito.*;
+
+import java.util.Calendar;
+import javax.jcr.Node;
+import javax.jcr.Session;
+
+import org.apache.jackrabbit.JcrConstants;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.WorkflowData;
+import com.adobe.granite.workflow.exec.WorkflowSession;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+
+import io.wcm.testing.aem.mock.junit5.AemContext;
+import io.wcm.testing.aem.mock.junit5.AemContextExtension;
+
+@ExtendWith(AemContextExtension.class)
+class NcsecuScheduledPublishWorkflowProcessTest {
+
+  private final AemContext context = new AemContext();
+
+  private WorkflowSession workflowSession;
+  private WorkItem workItem;
+  private Workflow workflow;
+  private WorkflowData workflowData;
+  private MetaDataMap metaDataMap;
+
+  private NcsecuScheduledPublishWorkflowProcess process;
+
+  @BeforeEach
+  void setUp() {
+    process = new NcsecuScheduledPublishWorkflowProcess();
+
+    workflowSession = mock(WorkflowSession.class);
+    workItem = mock(WorkItem.class);
+    workflow = mock(Workflow.class);
+    workflowData = mock(WorkflowData.class);
+    metaDataMap = mock(MetaDataMap.class);
+
+    when(workItem.getWorkflow()).thenReturn(workflow);
+    when(workItem.getWorkflowData()).thenReturn(workflowData);
+    when(workflow.getMetaDataMap()).thenReturn(metaDataMap);
+
+    // Provide a JCR Session to the WorkflowSession via AEM Mocks
+    Session jcrSession = context.resourceResolver().adaptTo(Session.class);
+    when(workflowSession.adaptTo(Session.class)).thenReturn(jcrSession);
+  }
+
+  @Test
+  void setsTimeoutFromScheduledDate() throws Exception {
+    // content structure
+    String pagePath = "/content/test/en/page";
+    Session session = context.resourceResolver().adaptTo(Session.class);
+    Node content = ensureContentNode(session, pagePath);
+
+    // Known date in the node
+    Calendar scheduled = Calendar.getInstance();
+    scheduled.clear();
+    scheduled.set(2030, Calendar.JANUARY, 2, 11, 12, 13);
+    content.setProperty("scheduledPublishDate", scheduled);
+    session.save();
+
+    when(workflowData.getPayload()).thenReturn(pagePath);
+
+    process.execute(workItem, workflowSession, mock(MetaDataMap.class));
+
+    // Verify the exact value is written
+    verify(metaDataMap, times(1))
+        .put(eq("absoluteTime"), argThat(val ->
+            val instanceof Calendar && ((Calendar) val).getTimeInMillis() == scheduled.getTimeInMillis()));
+  }
+
+  @Test
+  void setsTimeoutToNowWhenPropertyMissing() throws Exception {
+    String pagePath = "/content/test/en/page2";
+    Session session = context.resourceResolver().adaptTo(Session.class);
+    ensureContentNode(session, pagePath); // no scheduledPublishDate property
+    session.save();
+
+    when(workflowData.getPayload()).thenReturn(pagePath);
+
+    long before = System.currentTimeMillis();
+    process.execute(workItem, workflowSession, mock(MetaDataMap.class));
+    long after = System.currentTimeMillis();
+
+    // Verify we wrote a Calendar roughly "now"
+    verify(metaDataMap, times(1))
+        .put(eq("absoluteTime"), argThat(val -> {
+          if (!(val instanceof Calendar)) return false;
+          long ts = ((Calendar) val).getTimeInMillis();
+          // within ±5 seconds window
+          return ts >= before - 5000 && ts <= after + 5000;
+        }));
+  }
+
+  @Test
+  void doesNothingWhenContentNodeMissing() throws Exception {
+    // payload points to a path without jcr:content
+    String pagePath = "/content/missing/page";
+    when(workflowData.getPayload()).thenReturn(pagePath);
+
+    process.execute(workItem, workflowSession, mock(MetaDataMap.class));
+
+    // No metadata should be written
+    verify(metaDataMap, never()).put(anyString(), any());
+  }
+
+  /** Helper: ensures /content/.../jcr:content exists and returns it. */
+  private static Node ensureContentNode(Session session, String pagePath) throws Exception {
+    String[] parts = pagePath.substring(1).split("/");
+    Node current = session.getRootNode();
+    for (String p : parts) {
+      current = current.hasNode(p) ? current.getNode(p) : current.addNode(p);
+    }
+    Node content = current.hasNode(JcrConstants.JCR_CONTENT)
+        ? current.getNode(JcrConstants.JCR_CONTENT)
+        : current.addNode(JcrConstants.JCR_CONTENT, "nt:unstructured");
+    return content;
+  }
+}
