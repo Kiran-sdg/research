@@ -1,0 +1,155 @@
+package com.demo.core.workflow;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Calendar;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.Workflow;
+import com.adobe.granite.workflow.exec.WorkflowData;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.day.cq.commons.jcr.JcrConstants;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class ScheduledPublishWorkflowProcessTest {
+
+    private static final String PAYLOAD_PATH = "/content/test/page";
+    private static final String CONTENT_PATH = PAYLOAD_PATH + "/" + JcrConstants.JCR_CONTENT;
+    private static final String SCHEDULED_PUBLISH_DATE_PROPERTY = "scheduledPublishDate";
+    private static final String TIMEOUT_PROPERTY = "absoluteTime";
+
+    @Mock
+    private WorkItem workItem;
+
+    @Mock
+    private WorkflowSession workflowSession;
+
+    @Mock
+    private MetaDataMap metaDataMap;
+
+    @Mock
+    private WorkflowData workflowData;
+
+    @Mock
+    private Workflow workflow;
+
+    @Mock
+    private MetaDataMap workflowMetaDataMap;
+
+    @Mock
+    private Session session;
+
+    @Mock
+    private Node contentNode;
+
+    private ScheduledPublishWorkflowProcess scheduledPublishWorkflowProcess;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        scheduledPublishWorkflowProcess = new ScheduledPublishWorkflowProcess();
+
+        // Setup workflow mocks
+        when(workItem.getWorkflowData()).thenReturn(workflowData);
+        when(workflowData.getPayload()).thenReturn(PAYLOAD_PATH);
+        when(workItem.getWorkflow()).thenReturn(workflow);
+        when(workflow.getWorkflowData()).thenReturn(workflowData);
+        when(workflowData.getMetaDataMap()).thenReturn(workflowMetaDataMap);
+        
+        // Setup session mock
+        when(workflowSession.adaptTo(Session.class)).thenReturn(session);
+    }
+
+    @Test
+    void testExecuteWithScheduledPublishDate() throws Exception {
+        // Setup
+        Calendar scheduledDate = Calendar.getInstance();
+        scheduledDate.add(Calendar.DAY_OF_MONTH, 1); // Set to tomorrow
+        
+        Property scheduledPublishDateProp = mock(Property.class);
+        when(scheduledPublishDateProp.getDate()).thenReturn(scheduledDate);
+        
+        when(session.nodeExists(CONTENT_PATH)).thenReturn(true);
+        when(session.getNode(CONTENT_PATH)).thenReturn(contentNode);
+        when(contentNode.hasProperty(SCHEDULED_PUBLISH_DATE_PROPERTY)).thenReturn(true);
+        when(contentNode.getProperty(SCHEDULED_PUBLISH_DATE_PROPERTY)).thenReturn(scheduledPublishDateProp);
+        
+        // Execute
+        scheduledPublishWorkflowProcess.execute(workItem, workflowSession, metaDataMap);
+        
+        // Verify
+        verify(workflowMetaDataMap).put(eq(TIMEOUT_PROPERTY), eq(scheduledDate));
+    }
+
+    @Test
+    void testExecuteWithoutScheduledPublishDate() throws Exception {
+        // Setup
+        when(session.nodeExists(CONTENT_PATH)).thenReturn(true);
+        when(session.getNode(CONTENT_PATH)).thenReturn(contentNode);
+        when(contentNode.hasProperty(SCHEDULED_PUBLISH_DATE_PROPERTY)).thenReturn(false);
+        
+        // Execute
+        scheduledPublishWorkflowProcess.execute(workItem, workflowSession, metaDataMap);
+        
+        // Verify that current date is used
+        verify(workflowMetaDataMap).put(eq(TIMEOUT_PROPERTY), any(Calendar.class));
+    }
+
+    @Test
+    void testExecuteWithNullSession() throws Exception {
+        // Setup
+        when(workflowSession.adaptTo(Session.class)).thenReturn(null);
+        
+        // Execute
+        scheduledPublishWorkflowProcess.execute(workItem, workflowSession, metaDataMap);
+        
+        // Verify that nothing is set in the metadata map
+        verify(workflowMetaDataMap, times(0)).put(eq(TIMEOUT_PROPERTY), any());
+    }
+
+    @Test
+    void testExecuteWithNonExistentContentNode() throws Exception {
+        // Setup
+        when(session.nodeExists(CONTENT_PATH)).thenReturn(false);
+        
+        // Execute
+        scheduledPublishWorkflowProcess.execute(workItem, workflowSession, metaDataMap);
+        
+        // Verify that nothing is set in the metadata map
+        verify(workflowMetaDataMap, times(0)).put(eq(TIMEOUT_PROPERTY), any());
+    }
+
+    @Test
+    void testExecuteWithRepositoryException() throws Exception {
+        // Setup
+        when(session.nodeExists(CONTENT_PATH)).thenThrow(new RepositoryException("Test exception"));
+        
+        // Execute and verify exception
+        try {
+            scheduledPublishWorkflowProcess.execute(workItem, workflowSession, metaDataMap);
+        } catch (WorkflowException e) {
+            // Expected exception
+            verify(workflowMetaDataMap, times(0)).put(eq(TIMEOUT_PROPERTY), any());
+        }
+    }
+}
