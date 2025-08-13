@@ -1,0 +1,65 @@
+package com.demo.core.workflow;
+
+import java.util.Calendar;
+import java.util.Objects;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.adobe.granite.workflow.WorkflowException;
+import com.adobe.granite.workflow.WorkflowSession;
+import com.adobe.granite.workflow.exec.WorkItem;
+import com.adobe.granite.workflow.exec.WorkflowProcess;
+import com.adobe.granite.workflow.metadata.MetaDataMap;
+import com.day.cq.commons.jcr.JcrConstants;
+
+/**
+ * Workflow process that reads the scheduledPublishDate from payload properties,
+ * calculates the difference with current date, and sets the difference in
+ * milliseconds as timeout for the Approve task and publish process.
+ */
+@Component(service = WorkflowProcess.class, property = { "process.label=Schedule Publish Process",
+		"process.description=Sets timeout for publish process based on scheduledPublishDate" })
+public class ScheduledPublishWorkflowProcess implements WorkflowProcess {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ScheduledPublishWorkflowProcess.class);
+	private static final String SCHEDULED_PUBLISH_DATE_PROPERTY = "scheduledPublishDate";
+	private static final String TIMEOUT_PROPERTY = "absoluteTime";
+
+	@Override
+	public void execute(WorkItem workItem, WorkflowSession workflowSession, MetaDataMap metaDataMap)
+			throws WorkflowException {
+		try {
+			String payloadPath = workItem.getWorkflowData().getPayload().toString();
+			Session session = workflowSession.adaptTo(Session.class);
+			if (Objects.isNull(session)) {
+				LOG.error("Could not adapt workflow session to JCR session");
+				return;
+			}
+			String contentPath = payloadPath + "/" + JcrConstants.JCR_CONTENT;
+			if (!session.nodeExists(contentPath)) {
+				LOG.error("Content node does not exist at path: {}", contentPath);
+				return;
+			}
+			Node contentNode = session.getNode(contentPath);
+			if (contentNode.hasProperty(SCHEDULED_PUBLISH_DATE_PROPERTY)) {
+				Property scheduledPublishDateProp = contentNode.getProperty(SCHEDULED_PUBLISH_DATE_PROPERTY);
+				Calendar scheduledPublishDate = scheduledPublishDateProp.getDate();
+				workItem.getWorkflow().getWorkflowData().getMetaDataMap().put(TIMEOUT_PROPERTY, scheduledPublishDate);
+			}else {
+				workItem.getWorkflow().getWorkflowData().getMetaDataMap().put(TIMEOUT_PROPERTY, Calendar.getInstance());
+			}
+			
+
+		} catch (RepositoryException e) {
+			LOG.error("Repository exception while processing workflow", e);
+			throw new WorkflowException("Error processing workflow", e);
+		}
+	}
+}
