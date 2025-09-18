@@ -1,0 +1,161 @@
+/***************
+ * Brand tokens – replace with your exact values from the spec
+ ***************/
+:root{
+  --mkto-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mkto-text: #111827;            /* body text */
+  --mkto-muted: #6B7280;           /* helper text */
+  --mkto-bg: #FFFFFF;              /* field background */
+  --mkto-border: #D1D5DB;          /* default border */
+  --mkto-border-hover: #9CA3AF;    /* hover border */
+  --mkto-primary: #0B63CE;         /* brand */
+  --mkto-primary-hover: #0A55B2;   /* button/active hover */
+  --mkto-focus: #0B63CE;           /* focus ring */
+  --mkto-error: #B91C1C;           /* errors */
+  --mkto-radius: 8px;              /* field radius from spec */
+  --mkto-field-py: 12px;           /* vertical padding (44–48px tall fields) */
+  --mkto-field-px: 14px;           /* horizontal padding */
+  --mkto-gap: 8px;                 /* list gaps */
+}
+
+/* Base */
+.mktoForm{ font-family:var(--mkto-font); color:var(--mkto-text); line-height:1.4; }
+.mktoForm .mktoFormRow{ margin-bottom:16px; }
+.mktoForm label{ display:inline-block; margin-bottom:6px; font-weight:600; }
+
+/* Helper, required, and error text */
+.mktoForm .mktoInstruction{ color:var(--mkto-muted); font-size:14px; }
+.mktoForm .mktoAsterix{ color:var(--mkto-error); }
+.mktoForm .mktoError .mktoErrorMsg{ color:var(--mkto-error); font-size:14px; margin-top:6px; }
+
+/* Text inputs, textarea, and selects share the same box */
+.mktoForm input[type="text"],
+.mktoForm input[type="email"],
+.mktoForm input[type="tel"],
+.mktoForm input[type="url"],
+.mktoForm input[type="number"],
+.mktoForm input[type="password"],
+.mktoForm textarea,
+.mktoForm select{
+  width:100%;
+  padding: var(--mkto-field-py) var(--mkto-field-px);
+  border:1px solid var(--mkto-border);
+  border-radius: var(--mkto-radius);
+  background: var(--mkto-bg);
+  font-size:16px;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+/* Hover / focus / disabled / invalid */
+.mktoForm input:hover,
+.mktoForm select:hover,
+.mktoForm textarea:hover{
+  border-color: var(--mkto-border-hover);
+}
+.mktoForm input:focus,
+.mktoForm select:focus,
+.mktoForm textarea:focus{
+  outline: 3px solid var(--mkto-focus);
+  outline-offset: 2px;
+}
+.mktoForm input[disabled],
+.mktoForm select[disabled],
+.mktoForm textarea[disabled]{
+  background:#F3F4F6; border-color:#E5E7EB; color:#9CA3AF; cursor:not-allowed;
+}
+.mktoForm .mktoInvalid input,
+.mktoForm .mktoInvalid select,
+.mktoForm .mktoInvalid textarea{
+  border-color: var(--mkto-error);
+}
+
+/* Dropdown chevron (desktop) */
+.mktoForm select{
+  -webkit-appearance:none; appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'><path fill='%23111827' d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  padding-right:36px;
+}
+
+/* Button */
+.mktoForm .mktoButton{
+  display:inline-block;
+  background:var(--mkto-primary); color:#fff; border:0;
+  border-radius: var(--mkto-radius);
+  padding:12px 16px; font-weight:600; font-size:16px; cursor:pointer;
+  transition: background-color .15s ease, transform .02s ease;
+}
+.mktoForm .mktoButton:hover{ background:var(--mkto-primary-hover); }
+.mktoForm .mktoButton:active{ transform: translateY(1px); }
+.mktoForm .mktoButton:focus{ outline:3px solid var(--mkto-focus); outline-offset:2px; }
+
+/* Checkbox & Radio — spec-like sizes with brand accent */
+.mktoForm .mktoCheckboxList li,
+.mktoForm .mktoRadioList li{ margin-bottom: var(--mkto-gap); }
+
+.mktoForm input[type="checkbox"],
+.mktoForm input[type="radio"]{
+  width:20px; height:20px; vertical-align:middle; margin-right:8px;
+  accent-color: var(--mkto-primary); /* modern browsers: brand checkmark/dot */
+}
+
+/* Pixel-perfect custom check/radio (use if accent-color isn’t enough) */
+/* Checkbox */
+.mktoForm .as-custom input[type="checkbox"]{
+  -webkit-appearance:none; appearance:none;
+  width:20px; height:20px; border:1.6px solid var(--mkto-border);
+  border-radius:4px; background:#fff; display:inline-grid; place-items:center;
+}
+.mktoForm .as-custom input[type="checkbox"]:hover{ border-color:var(--mkto-border-hover); }
+.mktoForm .as-custom input[type="checkbox"]:checked{
+  border-color:var(--mkto-primary); background:var(--mkto-primary);
+}
+.mktoForm .as-custom input[type="checkbox"]:checked::after{
+  content:""; width:10px; height:6px; border:2px solid #fff; border-top:0; border-right:0; transform:rotate(-45deg);
+}
+/* Radio */
+.mktoForm .as-custom input[type="radio"]{
+  -webkit-appearance:none; appearance:none;
+  width:18px; height:18px; border:1.6px solid var(--mkto-border); border-radius:50%; background:#fff; display:grid; place-items:center;
+}
+.mktoForm .as-custom input[type="radio"]:hover{ border-color:var(--mkto-border-hover); }
+.mktoForm .as-custom input[type="radio"]:checked{ border-color:var(--mkto-primary); }
+.mktoForm .as-custom input[type="radio"]:checked::after{
+  content:""; width:10px; height:10px; border-radius:50%; background:var(--mkto-primary);
+}
+
+/* Toggle switch – apply to checkbox field with class "as-switch" (45×24) */
+.mktoForm input[type="checkbox"].as-switch{
+  -webkit-appearance:none; appearance:none; position:relative;
+  width:45px; height:24px; border-radius:999px; outline:0;
+  background:#D1D5DB; border:1px solid #D1D5DB; cursor:pointer;
+  vertical-align:middle; margin-right:8px;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.mktoForm input[type="checkbox"].as-switch::before{
+  content:""; position:absolute; top:2px; left:2px;
+  width:20px; height:20px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.25);
+  transition: transform .2s ease;
+}
+.mktoForm input[type="checkbox"].as-switch:checked{
+  background:var(--mkto-primary); border-color:var(--mkto-primary);
+}
+.mktoForm input[type="checkbox"].as-switch:checked::before{
+  transform: translateX(21px);
+}
+.mktoForm input[type="checkbox"].as-switch:focus{
+  box-shadow:0 0 0 3px rgba(11,99,206,.35);
+}
+
+/* Layout niceties for grouped lists */
+.mktoForm .mktoCheckboxList,
+.mktoForm .mktoRadioList{
+  display:block;
+}
+.mktoForm .mktoCheckboxList > label,
+.mktoForm .mktoRadioList > label{
+  margin:0; /* Marketo sometimes injects label around list; keep tight */
+}
+.mktoForm .mktoFieldWrap{ max-width:100%; } /* prevent fixed widths from themes */
