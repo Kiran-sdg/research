@@ -1,0 +1,94 @@
+(function (document, Granite) {
+    "use strict";
+
+    // Ensure Granite.$ (AEM jQuery) is available
+    var $ = Granite.$;
+
+    // Run when DOM and Granite jQuery are ready
+    $(function () {
+        // Wait until CUI is available
+        if (!window.CUI) {
+            console.warn("CUI not loaded yet, retrying...");
+            setTimeout(arguments.callee, 100);
+            return;
+        }
+
+        (function ($, CUI) {
+
+            // Extend the RTE UI for color picker
+            var colorPickerPlugin = new Class({
+
+                toString: "ColorPickerPlugin",
+
+                extend: CUI.rte.ui.cui.AbstractDialogBasedPlugin,
+
+                getFeatures: function () {
+                    return ["colorPicker"];
+                },
+
+                initializeUI: function (tbGenerator) {
+                    if (!this.isFeatureEnabled("colorPicker")) return;
+
+                    var group = tbGenerator.createElement("colorPicker", this, false, this.getTooltip("colorPicker"));
+                    tbGenerator.addElement("colorPicker", CUI.rte.plugins.Plugin.SEPARATOR, group, 10);
+                    tbGenerator.registerIcon("colorPicker", "paintbucket");
+                },
+
+                notifyPluginConfig: function (config) {
+                    this.config = config || {};
+                },
+
+                execute: function (id, value, envOptions) {
+                    if (id !== "colorPicker") return;
+
+                    var dialog = this.getDialog();
+                    dialog.$dialog.find("input[type='color']").val("#000000"); // default black
+                    this.showDialog();
+                },
+
+                // Dialog creation for color picker
+                getDialogConfig: function () {
+                    var dialogRef = this;
+                    return {
+                        title: "Select Text Color",
+                        size: "small",
+                        buttons: [
+                            {
+                                text: "Apply",
+                                primary: true,
+                                handler: function () {
+                                    var color = dialogRef.$dialog.find("input[type='color']").val();
+                                    dialogRef.applyColor(color);
+                                    dialogRef.hide();
+                                }
+                            },
+                            {
+                                text: "Cancel",
+                                handler: function () {
+                                    dialogRef.hide();
+                                }
+                            }
+                        ],
+                        content: '<input type="color" style="width:100%;" />'
+                    };
+                },
+
+                applyColor: function (color) {
+                    var context = this.editorKernel.getEditContext();
+                    var selection = CUI.rte.Selection.createProcessingSelection(context);
+                    if (selection) {
+                        CUI.rte.Common.setStyle(context, selection, {
+                            "color": color
+                        });
+                        this.editorKernel.relayCmd("afterExecCmd", "colorPicker", color);
+                    }
+                }
+            });
+
+            // Register plugin with AEM RTE
+            CUI.rte.plugins.PluginRegistry.register("colorPicker", colorPickerPlugin);
+
+        })($, window.CUI);
+    });
+
+})(document, Granite);
