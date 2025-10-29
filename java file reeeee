@@ -1,0 +1,21 @@
+(function() {
+   var COLOR_PICKER_FEATURE = "colorPicker";
+   var colorPalette = ['#FF0000', '#00FF00', '#0000FF', '#000000', '#FFFFFF']; // Customize as needed
+
+   CUI.rte.plugins.PluginRegistry.register("rte-color-picker", {
+       // Plugin logic, initialize icon and palette
+       // This is a minimal placeholder; extend for production use
+       initialize: function(editorKernel) {
+           var self = this;
+           self.editorKernel = editorKernel;
+       },
+       execute: function(pluginId, cmdId) {
+           if (cmdId === COLOR_PICKER_FEATURE) {
+               // show dialog, let user pick a color, apply span style
+           }
+       },
+       getFeatures: function() {
+           return [COLOR_PICKER_FEATURE];
+       }
+   });
+})();
