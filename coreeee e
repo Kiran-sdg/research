@@ -1,0 +1,4 @@
+$(document).on("foundation-contentloaded", ".cq-dialog", function(event) {
+    // Executed after dialog content and widgets are loaded
+console.log(‘JAVASCRIPT RTE EDIT’);
+});
