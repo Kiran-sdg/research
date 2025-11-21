@@ -1,0 +1,153 @@
+/* ========== FORM CONTAINER / LAYOUT ========== */
+
+/* Center the form and give it the white card look */
+.mktoForm,
+.mktoForm form {
+  margin: 0 auto !important;
+  max-width: 640px !important;
+  display: block !important;
+}
+
+.mktoForm {
+  background-color: #ffffff !important;
+  border: 1px solid #E0E0E0 !important;
+  border-radius: 12px !important;
+  padding: 32px !important;
+  box-sizing: border-box !important;
+}
+
+/* Remove Marketo’s default left “gutter” column */
+.mktoForm .mktoGutter {
+  display: none !important;
+}
+
+/* Stack label + field nicely with spacing */
+.mktoForm .mktoFieldWrap {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+/* One row per field */
+.mktoForm .mktoFormRow {
+  margin-bottom: 16px !important;
+}
+
+/* ========== LABELS & REQUIRED ASTERISK ========== */
+
+.mktoForm .mktoLabel {
+  /* typography */
+  line-height: 32px !important;
+  font-size: 16px !important;
+  font-family: Lexend-Medium, sans-serif !important;
+  color: #1C1C1C !important;
+  font-weight: 400 !important;
+
+  /* layout for label text + * */
+  display: inline-flex !important;
+  align-items: center !important;
+  column-gap: 4px !important;
+}
+
+/* Move asterisk to the right of the label text */
+.mktoForm .mktoAsterisk {
+  order: 2 !important;
+  margin-left: 4px !important;
+}
+
+/* Label text stays first */
+.mktoForm .mktoLabel > span,
+.mktoForm .mktoLabel > div:not(.mktoAsterisk) {
+  order: 1 !important;
+}
+
+/* Smaller labels on tablet / mobile if you want */
+@media screen and (max-width: 1024px) {
+  .mktoForm .mktoLabel {
+    font-size: 14px !important;
+  }
+}
+
+/* ========== INPUT FIELDS (TEXT, EMAIL, TEL, SELECT, TEXTAREA) ========== */
+
+/* Make ALL field types look the same – this fixes Phone + Email */
+.mktoForm .mktoField {
+  padding: 2px 3px !important;
+  line-height: 32px !important;
+  font-size: 16px !important;
+  font-family: Lexend-Medium, sans-serif !important;
+  font-weight: 700 !important;
+  height: 48px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Focus state */
+.mktoForm .mktoField:focus,
+.mktoForm .mktoField:focus-visible {
+  border-color: #4399ff !important;
+  border-width: 2.5px !important;
+  border-radius: 4px !important;
+  outline: none !important;
+}
+
+/* Invalid / error state */
+.mktoForm input[aria-invalid="true"],
+.mktoForm select[aria-invalid="true"],
+.mktoForm textarea[aria-invalid="true"] {
+  border-color: #AE1100 !important;
+}
+
+/* ========== CHECKBOXES & CHECKBOX LIST ========== */
+
+.mktoForm input[type="checkbox"].mktoField {
+  height: 24px !important;
+  width: 24px !important;
+  opacity: 1 !important;
+  appearance: auto;
+  accent-color: #205aa0; /* SECU-ish blue */
+  border-radius: 4px !important;
+}
+
+/* Checkbox group spacing */
+.mktoForm .mktoCheckboxList {
+  padding-top: 0 !important;
+}
+
+.mktoForm .mktoCheckboxList > label {
+  margin-left: 2.0em !important;
+  margin-bottom: 8px !important;
+  line-height: 1.2em !important;
+  display: block !important;
+  padding-left: 10px !important;
+  padding-top: 0.25em !important;
+  min-height: 20px !important;
+  padding-bottom: 0.25em !important;
+}
+
+/* ========== BUTTON ========== */
+
+.mktoButton {
+  background-color: #205aa0 !important;
+  border: 2px solid #205aa0 !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  font-family: Lexend-Medium, sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  line-height: 28px !important;
+  padding: 8px 16px !important;
+  text-decoration: none !important;
+  background-image: none !important;
+}
+
+.mktoForm .mktoButton:hover {
+  background: #1b4981 !important;
+}
+
+.mktoForm .mktoButton:focus {
+  outline: 2px solid #205aa0 !important;
+  outline-offset: 2px !important;
+}
