@@ -1,0 +1,32 @@
+<div class="responsive-video ${properties.responsive ? 'is-responsive' : ''}">
+
+  <!-- Preview mode: NO iframe in HTL -->
+  <sly data-sly-test="${properties.hoverAutoplay}">
+    <div class="cmp-embed-video js-embed-init"
+         data-embed-url="${properties.embedUrl @ context='uri'}"
+         data-hover-autoplay="true"
+         data-responsive="${properties.responsive ? 'true' : 'false'}">
+    </div>
+
+    <button type="button"
+            class="cmp-embed-video__mute"
+            aria-pressed="false"
+            aria-label="Unmute video">
+      Mute
+    </button>
+  </sly>
+
+  <!-- Normal mode: keep existing iframe -->
+  <sly data-sly-test="${!properties.hoverAutoplay}">
+    <iframe
+      class="cmp-embed-video__iframe"
+      src="${embeddedmodel.iframeSrc @ context='uri'}"
+      width="${embeddedmodel.iframeWidth}"
+      height="${embeddedmodel.iframeHeight}"
+      frameborder="0"
+      allowfullscreen
+      allow="autoplay; fullscreen; picture-in-picture">
+    </iframe>
+  </sly>
+
+</div>
