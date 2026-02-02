@@ -1,0 +1,229 @@
+(function () {
+  "use strict";
+
+  function isTouch() {
+    return window.matchMedia("(pointer: coarse)").matches;
+  }
+
+  function safeUrl(url) {
+    try { return new URL(url); } catch (e) { return null; }
+  }
+
+  function detectProvider(u) {
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtu.be" || host === "youtube-nocookie.com") return "youtube";
+    if (host === "vimeo.com" || host === "player.vimeo.com") return "vimeo";
+    return "unknown";
+  }
+
+  function getYouTubeId(u) {
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") return u.pathname.split("/").filter(Boolean)[0] || null;
+    if (host === "youtube.com" || host === "m.youtube.com") return u.searchParams.get("v");
+    if (host === "youtube-nocookie.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      const idx = parts.indexOf("embed");
+      return idx >= 0 ? parts[idx + 1] : null;
+    }
+    return null;
+  }
+
+  function getVimeoId(u) {
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "vimeo.com") return u.pathname.split("/").filter(Boolean)[0] || null;
+    if (host === "player.vimeo.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      const idx = parts.indexOf("video");
+      return idx >= 0 ? parts[idx + 1] : null;
+    }
+    return null;
+  }
+
+  function buildYouTubeEmbed(id) {
+    // enablejsapi needed for postMessage play/pause/mute
+    const origin = encodeURIComponent(window.location.origin);
+    const base = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`;
+    const params = new URLSearchParams({
+      playsinline: "1",
+      rel: "0",
+      controls: "0",
+      mute: "1",
+      enablejsapi: "1",
+      origin: window.location.origin
+    });
+    return `${base}?${params.toString()}`;
+  }
+
+  function buildVimeoEmbed(id, playerId) {
+    // background=1 hides chrome; muted=1 required for autoplay in many browsers
+    const base = `https://player.vimeo.com/video/${encodeURIComponent(id)}`;
+    const params = new URLSearchParams({
+      muted: "1",
+      controls: "0",
+      autopause: "0",
+      playsinline: "1",
+      // for postMessage targeting:
+      player_id: playerId
+    });
+    return `${base}?${params.toString()}`;
+  }
+
+  function createIframe(src, iframeId) {
+    const iframe = document.createElement("iframe");
+    iframe.className = "cmp-embed-video__iframe";
+    iframe.id = iframeId;
+    iframe.setAttribute("src", src);
+    iframe.setAttribute("frameborder", "0");
+    iframe.setAttribute("allowfullscreen", "true");
+    iframe.setAttribute("allow", "autoplay; fullscreen; picture-in-picture");
+    return iframe;
+  }
+
+  // ---- postMessage controls (keeps playback position) ----
+
+  function ytCommand(iframe, func) {
+    if (!iframe || !iframe.contentWindow) return;
+    iframe.contentWindow.postMessage(JSON.stringify({
+      event: "command",
+      func: func,
+      args: []
+    }), "*");
+  }
+
+  function vimeoCommand(iframe, method, value) {
+    if (!iframe || !iframe.contentWindow) return;
+    const msg = { method: method };
+    if (typeof value !== "undefined") msg.value = value;
+    iframe.contentWindow.postMessage(msg, "*");
+  }
+
+  function initOne(el) {
+    const urlStr = el.dataset.embedUrl || "";
+    const hoverAutoplay = el.dataset.hoverAutoplay === "true";
+
+    const u = safeUrl(urlStr);
+    if (!u) return;
+
+    const provider = detectProvider(u);
+    if (provider === "unknown") return;
+
+    const iframeId = `embed_${Math.random().toString(16).slice(2)}`;
+    let iframe = null;
+
+    // locate mute button: it’s currently a sibling in your DOM
+    const muteBtn = el.parentElement?.querySelector(".cmp-embed-video__mute");
+
+    // build iframe src
+    if (provider === "youtube") {
+      const id = getYouTubeId(u);
+      if (!id) return;
+      iframe = createIframe(buildYouTubeEmbed(id), iframeId);
+    } else if (provider === "vimeo") {
+      const id = getVimeoId(u);
+      if (!id) return;
+      iframe = createIframe(buildVimeoEmbed(id, iframeId), iframeId);
+    }
+
+    // Insert iframe into the placeholder div (don’t replace node; keeps layout stable)
+    el.innerHTML = "";
+    el.appendChild(iframe);
+
+    // default muted
+    let isMuted = true;
+    if (muteBtn) {
+      muteBtn.hidden = false;
+      muteBtn.textContent = "Mute";
+      muteBtn.setAttribute("aria-pressed", "false");
+      muteBtn.setAttribute("aria-label", "Unmute video");
+    }
+
+    function play() {
+      if (provider === "youtube") {
+        // ensure muted for autoplay friendliness
+        ytCommand(iframe, "mute");
+        ytCommand(iframe, "playVideo");
+      } else {
+        vimeoCommand(iframe, "setVolume", 0);
+        vimeoCommand(iframe, "play");
+      }
+      // analytics hook: preview start
+      // window.dataLayer?.push({ event: "video_preview_start", provider });
+    }
+
+    function pause() {
+      if (provider === "youtube") ytCommand(iframe, "pauseVideo");
+      else vimeoCommand(iframe, "pause");
+      // analytics hook: preview pause
+    }
+
+    function mute() {
+      isMuted = true;
+      if (provider === "youtube") ytCommand(iframe, "mute");
+      else vimeoCommand(iframe, "setVolume", 0);
+
+      if (muteBtn) {
+        muteBtn.textContent = "Mute";
+        muteBtn.setAttribute("aria-pressed", "false");
+        muteBtn.setAttribute("aria-label", "Unmute video");
+      }
+    }
+
+    function unmute() {
+      isMuted = false;
+      if (provider === "youtube") ytCommand(iframe, "unMute");
+      else vimeoCommand(iframe, "setVolume", 1);
+
+      if (muteBtn) {
+        muteBtn.textContent = "Unmute";
+        muteBtn.setAttribute("aria-pressed", "true");
+        muteBtn.setAttribute("aria-label", "Mute video");
+      }
+    }
+
+    // Desktop hover behavior
+    if (hoverAutoplay && !isTouch()) {
+      const hoverTarget = el; // use the placeholder wrapper
+      hoverTarget.addEventListener("mouseenter", play);
+      hoverTarget.addEventListener("mouseleave", pause);
+    }
+
+    // Mobile in-view behavior
+    if (hoverAutoplay) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) play();
+          else pause();
+        });
+      }, { threshold: 0.6 });
+
+      io.observe(el);
+    }
+
+    // Mute toggle behavior
+    if (muteBtn) {
+      muteBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (isMuted) unmute();
+        else mute();
+      });
+    }
+
+    // Click-through: “full experience”
+    // Minimal approach: unmute + show controls by opening URL in new tab (safe)
+    // If you want modal/fullscreen later, we can do it next PR.
+    el.addEventListener("click", () => {
+      // analytics hook: click-through
+      // window.dataLayer?.push({ event: "video_click_through", provider });
+      window.open(urlStr, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function initAll() {
+    document.querySelectorAll(".cmp-embed-video.js-embed-init[data-embed-url]").forEach(initOne);
+  }
+
+  document.readyState !== "loading"
+    ? initAll()
+    : document.addEventListener("DOMContentLoaded", initAll);
+
+})();
