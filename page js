@@ -1,0 +1,23 @@
+function populate() {
+  var creditHistory = document.getElementById("creditHistory").value;
+  var vehicleCondition = document.getElementById("vehicleCondition").value;
+
+  var creditHistoryResult = document.getElementById("creditHistoryResult");
+  var vehicleConditionResult = document.getElementById("vehicleConditionResult");
+  var headerResult = document.getElementById("headerResult");
+
+  var headerEl = document.createElement("h3");
+  headerEl.textContent = "Estimated rates";
+
+  var creditEl = document.createElement("h4");
+  creditEl.textContent = "Credit: " + creditHistory;
+
+  var vehicleEl = document.createElement("h4");
+  vehicleEl.textContent = vehicleCondition;
+
+  headerResult.replaceChildren(headerEl);
+  creditHistoryResult.replaceChildren(creditEl);
+  vehicleConditionResult.replaceChildren(vehicleEl);
+
+  document.querySelector(".cmp-auto-page__inner > div.disclaimer").classList.add("show-para");
+}
