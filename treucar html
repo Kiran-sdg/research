@@ -1,0 +1,118 @@
+<div class="cmp_truecar_search"
+     data-cmp-is="truecar-search"
+     data-new-car-url="${properties.newCarBaseUrl @ context='uri'}"
+     data-used-car-url="${properties.usedCarBaseUrl @ context='uri'}"
+     data-sly-use.template="core/wcm/components/commons/v1/templates.html"
+     data-sly-test.hasContent="${properties.newCarTitle || properties.usedCarTitle || properties.newCarButtonLabel || properties.usedCarButtonLabel}"
+     data-placeholder-text="${wcmmode.edit && 'Please configure TrueCar Search component' @ i18n}">
+
+    <div class="cmp_truecar_search__container">
+        <div class="cmp_truecar_search__cards">
+
+            <div class="cmp_truecar_search__card cmp_truecar_search__card--new" data-truecar-type="new">
+                <h3 class="cmp_truecar_search__card-title">
+                    ${properties.newCarTitle || 'Price a new car'}
+                </h3>
+
+                <div class="cmp_truecar_search__accent-line"></div>
+
+                <div class="cmp_truecar_search__field cmp_truecar_search__field--make">
+                    <label class="cmp_truecar_search__label" for="${resource.name}-new-make">Make</label>
+
+                    <select class="cmp_truecar_search__select" id="${resource.name}-new-make" name="new-make">
+                        <option value="">Select make</option>
+                        <option value="acura">Acura</option>
+                        <option value="audi">Audi</option>
+                        <option value="bmw">BMW</option>
+                        <option value="chevrolet">Chevrolet</option>
+                        <option value="ford">Ford</option>
+                        <option value="honda">Honda</option>
+                        <option value="hyundai">Hyundai</option>
+                        <option value="kia">Kia</option>
+                        <option value="nissan">Nissan</option>
+                        <option value="toyota">Toyota</option>
+                    </select>
+                </div>
+
+                <div class="cmp_truecar_search__row">
+                    <div class="cmp_truecar_search__field cmp_truecar_search__field--zip">
+                        <label class="cmp_truecar_search__label" for="${resource.name}-new-zip">Zip code</label>
+
+                        <input class="cmp_truecar_search__input"
+                               id="${resource.name}-new-zip"
+                               name="new-zip"
+                               type="text"
+                               inputmode="numeric"
+                               maxlength="5"
+                               pattern="[0-9]{5}"
+                               placeholder="e.g. 27513"
+                               aria-describedby="${resource.name}-new-zip-error"/>
+                    </div>
+
+                    <button class="cmp_truecar_search__button" type="button" disabled>
+                        ${properties.newCarButtonLabel || 'Shop new cars'}
+                    </button>
+                </div>
+
+                <div class="cmp_truecar_search__error"
+                     id="${resource.name}-new-zip-error"
+                     aria-live="polite"
+                     hidden></div>
+            </div>
+
+            <div class="cmp_truecar_search__card cmp_truecar_search__card--used" data-truecar-type="used">
+                <h3 class="cmp_truecar_search__card-title">
+                    ${properties.usedCarTitle || 'Price a used car'}
+                </h3>
+
+                <div class="cmp_truecar_search__accent-line"></div>
+
+                <div class="cmp_truecar_search__field cmp_truecar_search__field--make">
+                    <label class="cmp_truecar_search__label" for="${resource.name}-used-make">Make</label>
+
+                    <select class="cmp_truecar_search__select" id="${resource.name}-used-make" name="used-make">
+                        <option value="">Select make</option>
+                        <option value="acura">Acura</option>
+                        <option value="audi">Audi</option>
+                        <option value="bmw">BMW</option>
+                        <option value="chevrolet">Chevrolet</option>
+                        <option value="ford">Ford</option>
+                        <option value="honda">Honda</option>
+                        <option value="hyundai">Hyundai</option>
+                        <option value="kia">Kia</option>
+                        <option value="nissan">Nissan</option>
+                        <option value="toyota">Toyota</option>
+                    </select>
+                </div>
+
+                <div class="cmp_truecar_search__row">
+                    <div class="cmp_truecar_search__field cmp_truecar_search__field--zip">
+                        <label class="cmp_truecar_search__label" for="${resource.name}-used-zip">Zip code</label>
+
+                        <input class="cmp_truecar_search__input"
+                               id="${resource.name}-used-zip"
+                               name="used-zip"
+                               type="text"
+                               inputmode="numeric"
+                               maxlength="5"
+                               pattern="[0-9]{5}"
+                               placeholder="e.g. 27513"
+                               aria-describedby="${resource.name}-used-zip-error"/>
+                    </div>
+
+                    <button class="cmp_truecar_search__button" type="button" disabled>
+                        ${properties.usedCarButtonLabel || 'Shop used cars'}
+                    </button>
+                </div>
+
+                <div class="cmp_truecar_search__error"
+                     id="${resource.name}-used-zip-error"
+                     aria-live="polite"
+                     hidden></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<sly data-sly-call="${template.placeholder @ isEmpty=!hasContent, classAppend='cmp_truecar_search'}"></sly>
