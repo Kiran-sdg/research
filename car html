@@ -1,0 +1,100 @@
+<sly data-sly-use.model="org.ncsecu.aem.site.core.models.NcsecuTrueCarSearch" />
+<sly data-sly-use.templates="core/wcm/components/commons/v1/templates.html" />
+
+<div class="cmp_truecar_search">
+
+    <div class="cmp_truecar_search__card">
+
+        <h2 class="cmp_truecar_search__title">
+            ${properties.title}
+        </h2>
+
+        <!-- MAKE FIELD -->
+        <div class="cmp_truecar_search__field">
+
+            <label
+                class="cmp_truecar_search__label"
+                for="${resource.name}-make">
+                Make
+            </label>
+
+            <select
+                id="${resource.name}-make"
+                class="cmp_truecar_search__select"
+                aria-describedby="${resource.name}-make-help">
+
+                <option value="">
+                    Select make
+                </option>
+
+                <sly data-sly-list.make="${model.makes}">
+                    <option value="${make.value}">
+                        ${make.title}
+                    </option>
+                </sly>
+
+            </select>
+
+            <span
+                class="cmp_truecar_search__helper"
+                id="${resource.name}-make-help">
+                Please select an item in the list.
+            </span>
+
+        </div>
+
+        <!-- ZIP FIELD -->
+        <div class="cmp_truecar_search__field">
+
+            <label
+                class="cmp_truecar_search__label"
+                for="${resource.name}-zip">
+                ZIP code
+            </label>
+
+            <input
+                type="text"
+                id="${resource.name}-zip"
+                class="cmp_truecar_search__input"
+                inputmode="numeric"
+                maxlength="5"
+                placeholder="e.g. 27513"
+                aria-describedby="${resource.name}-zip-help ${resource.name}-zip-error" />
+
+            <span
+                class="cmp_truecar_search__helper"
+                id="${resource.name}-zip-help">
+                Enter a 5-digit ZIP code.
+            </span>
+
+            <div
+                class="cmp_truecar_search__error"
+                id="${resource.name}-zip-error"
+                aria-live="polite"
+                hidden>
+            </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div
+            class="cmp_truecar_search__actions"
+            data-base-url="${properties.link @ context='attribute'}">
+
+            <a class="cmp-teaser__action-link cmp_truecar_search__cta disabled"
+               href="javascript:void(0)"
+               aria-disabled="true"
+               target="${properties.linkTarget}"
+               aria-label="${properties.accessibilityLabel}">
+
+                ${properties.text}
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<sly data-sly-call="${templates.placeholder @ isEmpty=!properties.title}" />
