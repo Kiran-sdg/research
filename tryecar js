@@ -1,0 +1,113 @@
+(function () {
+  'use strict';
+
+  const COMPONENT_SELECTOR = '.cmp_truecar_search';
+
+  function isValidZip(zip) {
+    return /^[0-9]{5}$/.test(zip);
+  }
+
+  function isUsedCarUrl(baseUrl) {
+    return baseUrl && baseUrl.indexOf('used-cars-for-sale') !== -1;
+  }
+
+  function buildTrueCarUrl(baseUrl, make, zip) {
+    if (!baseUrl || !make || !zip) {
+      return '';
+    }
+
+    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+    if (isUsedCarUrl(cleanBaseUrl)) {
+      return `${cleanBaseUrl}/${encodeURIComponent(make)}/?postalCode=${encodeURIComponent(zip)}`;
+    }
+
+    const separator = cleanBaseUrl.indexOf('?') > -1 ? '&' : '?';
+
+    return `${cleanBaseUrl}${separator}chromeMake=${encodeURIComponent(make)}&postalCode=${encodeURIComponent(zip)}`;
+  }
+
+  function disableCta(cta) {
+    cta.classList.add('disabled');
+    cta.setAttribute('aria-disabled', 'true');
+    cta.setAttribute('href', 'javascript:void(0)');
+  }
+
+  function enableCta(cta, url) {
+    cta.classList.remove('disabled');
+    cta.setAttribute('aria-disabled', 'false');
+    cta.setAttribute('href', url);
+  }
+
+  function updateState(component) {
+    const makeSelect = component.querySelector('.cmp_truecar_search__select');
+    const zipInput = component.querySelector('.cmp_truecar_search__input');
+    const cta = component.querySelector('.cmp_truecar_search__cta');
+    const error = component.querySelector('.cmp_truecar_search__error');
+    const actions = component.querySelector('.cmp_truecar_search__actions');
+
+    if (!makeSelect || !zipInput || !cta || !actions) {
+      return;
+    }
+
+    const make = makeSelect.value.trim();
+    const zip = zipInput.value.trim();
+    const baseUrl = actions.getAttribute('data-base-url');
+
+    const hasMake = make !== '';
+    const validZip = isValidZip(zip);
+
+    if (zip.length > 0 && !validZip) {
+      if (error) {
+        error.hidden = false;
+        error.textContent = 'Please enter a valid 5-digit ZIP code.';
+      }
+      zipInput.setAttribute('aria-invalid', 'true');
+    } else {
+      if (error) {
+        error.hidden = true;
+        error.textContent = '';
+      }
+      zipInput.removeAttribute('aria-invalid');
+    }
+
+    if (hasMake && validZip) {
+      enableCta(cta, buildTrueCarUrl(baseUrl, make, zip));
+    } else {
+      disableCta(cta);
+    }
+  }
+
+  function init(component) {
+    const makeSelect = component.querySelector('.cmp_truecar_search__select');
+    const zipInput = component.querySelector('.cmp_truecar_search__input');
+    const cta = component.querySelector('.cmp_truecar_search__cta');
+
+    if (!makeSelect || !zipInput || !cta) {
+      return;
+    }
+
+    disableCta(cta);
+
+    makeSelect.addEventListener('change', function () {
+      updateState(component);
+    });
+
+    zipInput.addEventListener('input', function () {
+      zipInput.value = zipInput.value.replace(/\D/g, '').slice(0, 5);
+      updateState(component);
+    });
+
+    cta.addEventListener('click', function (event) {
+      if (cta.getAttribute('aria-disabled') === 'true') {
+        event.preventDefault();
+      }
+    });
+
+    updateState(component);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll(COMPONENT_SELECTOR).forEach(init);
+  });
+}());
