@@ -80,4 +80,29 @@ public class NcsecuTrueCarSearchImpl implements NcsecuTrueCarSearch {
     public String getMakeListPath() {
         return makeListPath;
     }
+
+
+
+@PostConstruct
+protected void init() {
+    makes = new ArrayList<>();
+
+    if (StringUtils.isBlank(makeListPath) || resourceResolver == null) {
+        return;
+    }
+
+    Resource listResource = resourceResolver.getResource(makeListPath + "/jcr:content/list");
+
+    if (listResource == null) {
+        return;
+    }
+
+    for (Resource itemResource : listResource.getChildren()) {
+        String title = itemResource.getValueMap().get("jcr:title", String.class);
+        String value = itemResource.getValueMap().get("value", String.class);
+
+        if (StringUtils.isNotBlank(title) && StringUtils.isNotBlank(value)) {
+            makes.add(new NcsecuTrueCarMake(title, value));
+        }
+    }
 }
