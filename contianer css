@@ -1,0 +1,23 @@
+.cmp-container {
+    position: relative;
+    overflow: hidden;
+
+    &.cmp-container--has-overlay {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .cmp-container__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 45, 114, var(--container-overlay-opacity, 0.9));
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    > *:not(.cmp-container__overlay) {
+        position: relative;
+        z-index: 2;
+    }
+}
